@@ -1,0 +1,20 @@
+.wrapper {
+    display: flex;
+    gap: 24px;
+}
+
+.image {
+    width: 24px;
+    height: 24px;
+}
+
+.text {
+    display: flex;
+    flex-direction: column;
+    color: white;
+    font-size: 14px;
+}
+
+.button {
+    cursor: pointer;
+}
