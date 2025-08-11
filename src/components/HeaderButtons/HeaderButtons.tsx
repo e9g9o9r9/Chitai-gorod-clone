@@ -4,6 +4,8 @@ import cart from "../../assets/svg/cart.svg"
 import user from "../../assets/svg/user.svg"
 import bookmarks from "../../assets/svg/bookmarks.svg"
 import styles from "./styles.module.scss"
+import { useAppSelector } from '../../hooks/hooks'
+import { RootState } from '../../store/store'
 
 interface Props {
     handleOpen: () => void
@@ -12,16 +14,20 @@ interface Props {
 interface ButtonItem {
     id: number;
     icon: string;
-    text: string;
+    text: string | undefined | null;
     link: string | MouseEventHandler<HTMLDivElement>;
 }
 
 const HeaderButtons: React.FC<Props> = ({ handleOpen }) => {
+    const { name, token } = useAppSelector(
+        (state: RootState) => state.login
+    );
+
     const buttons: ButtonItem[] = [
         {
             id: 1,
             icon: user,
-            text: "Войти",
+            text: token ? name : "Войти",
             link: handleOpen,
         },
         {

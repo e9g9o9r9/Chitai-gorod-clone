@@ -12,7 +12,6 @@ const Header = () => {
   const [openSideBar, setOpenSideBar] = React.useState(false);
 
   const toggleDrawer = (open: boolean) => {
-    console.log(open);
     setOpenSideBar(open);
   };
 
