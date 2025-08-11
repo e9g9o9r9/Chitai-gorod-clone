@@ -1,15 +1,15 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
-import Button from '@mui/material/Button';
 import List from '@mui/material/List';
-import Divider from '@mui/material/Divider';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import MailIcon from '@mui/icons-material/Mail';
+import { useAppDispatch, useAppSelector } from '../../hooks/hooks';
+import { fetchCategories } from '../../store/slices/categoriesSlice';
+import styles from "./styles.module.scss"
+
 
 interface Props {
     toggleDrawer: (open: boolean) => void
@@ -18,29 +18,25 @@ interface Props {
 
 export const SideBar: React.FC<Props> = ({ toggleDrawer, open }) => {
 
+    const categories = useAppSelector(state => state.catergories.categories)
+    const dispatch = useAppDispatch()
+
+    React.useEffect(() => {
+        dispatch(fetchCategories());
+    }, [dispatch])
+
+    const sortedCategories = [...categories].sort((a, b) => +a.id - +b.id);
+
     const DrawerList = (
         <Box sx={{ width: 250 }} role="presentation" onClick={() => toggleDrawer(false)}>
             <List>
-                {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-                    <ListItem key={text} disablePadding>
+                {sortedCategories.map((category) => (
+                    <ListItem key={category.id} disablePadding>
                         <ListItemButton>
                             <ListItemIcon>
-                                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+                                <img src={category.icon} className={styles.image} />
                             </ListItemIcon>
-                            <ListItemText primary={text} />
-                        </ListItemButton>
-                    </ListItem>
-                ))}
-            </List>
-            <Divider />
-            <List>
-                {['All mail', 'Trash', 'Spam'].map((text, index) => (
-                    <ListItem key={text} disablePadding>
-                        <ListItemButton>
-                            <ListItemIcon>
-                                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                            </ListItemIcon>
-                            <ListItemText primary={text} />
+                            <ListItemText primary={category.name} />
                         </ListItemButton>
                     </ListItem>
                 ))}

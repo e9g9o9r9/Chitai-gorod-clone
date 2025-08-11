@@ -1,13 +1,35 @@
-import { configureStore } from '@reduxjs/toolkit'
-import { useDispatch } from 'react-redux'
-// import rootReducer from './rootReducer'
+import { configureStore } from '@reduxjs/toolkit';
+import categoriesReducer from "./slices/categoriesSlice"
+import registerReducer from "./slices/registerSlice"
+import loginReducer from "./slices/authSlice"
+import { persistReducer, persistStore } from 'redux-persist';
+import storage from 'redux-persist/lib/storage';
+
+const persistConfig = {
+  key: 'auth',
+  storage,
+  whitelist: ['user', 'token', 'name'],
+};
+
+const persistedReducer = persistReducer(persistConfig, loginReducer);
 
 
 export const store = configureStore({
-    reducer: {},
-})
+  reducer: {
+    catergories: categoriesReducer,
+    register: registerReducer,
+    login: persistedReducer,
+  },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
+      },
+    }),
+});
 
-export type AppDispatch = typeof store.dispatch
-export const useAppDispatch = useDispatch.withTypes<AppDispatch>() // Export a hook that can be reused to resolve types
+export const persistor = persistStore(store);
 
-export default store
+export type RootState = ReturnType<typeof store.getState>;
+
+export type AppDispatch = typeof store.dispatch;
