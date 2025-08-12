@@ -1,3 +1,5 @@
+import { InputItem } from "../components/AuthorizationModal/AuthorizationModal";
+
 export const menuItems = [
     {
         id: 1,
@@ -35,3 +37,15 @@ export const menuItems = [
         link: "/"
     },
 ]
+
+    export const registrationInputs: InputItem[] = [
+        { id: 1, text: "Введите вашу электронную почту", name: "email" },
+        { id: 2, text: "Ваше имя", name: "name" },
+        { id: 3, text: "Введите пароль", name: "password" },
+        { id: 4, text: "Введите пароль повторно", name: "confirmPassword" },
+    ];
+
+    export const authInputs: InputItem[] = [
+        { id: 1, text: "Введите вашу электронную почту", name: "email" },
+        { id: 2, text: "Введите пароль", name: "password" },
+    ];

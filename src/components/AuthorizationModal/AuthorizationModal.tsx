@@ -12,6 +12,8 @@ import { register, reset } from '../../store/slices/registerSlice';
 import { ChangeEvent } from 'react';
 import { RootState } from '../../store/store';
 import { login } from '../../store/slices/authSlice';
+import { registrationInputs, authInputs } from '../../common/constants';
+
 const style = {
     position: 'absolute',
     display: "flex",
@@ -33,10 +35,10 @@ interface Props {
     open: boolean
 }
 
-interface InputItem {
+export interface InputItem {
     id: number
     text: string
-    name: string // Добавляем имя поля для связи с formData
+    name: string
 }
 
 interface FormData {
@@ -44,6 +46,13 @@ interface FormData {
     name: string;
     password: string;
     confirmPassword: string;
+}
+
+interface FormErrors {
+    email?: string;
+    name?: string;
+    password?: string;
+    confirmPassword?: string;
 }
 
 const AuthorizationModal: React.FC<Props> = ({ handleClose, open }) => {
@@ -57,47 +66,42 @@ const AuthorizationModal: React.FC<Props> = ({ handleClose, open }) => {
         password: '',
         confirmPassword: ''
     });
+    const [errors, setErrors] = useState<FormErrors>({});
 
     const { isSuccess } = useAppSelector(
         (state: RootState) => state.register
     );
-    console.log(formData, "formData111");
 
-    const registrationInputs: InputItem[] = [
-        {
-            id: 1,
-            text: "Введите вашу электроную почту",
-            name: "email"
-        },
-        {
-            id: 2,
-            text: "Ваше имя",
-            name: "name"
-        },
-        {
-            id: 3,
-            text: "Введите пароль",
-            name: "password"
-        },
-        {
-            id: 4,
-            text: "Введите пароль повторно",
-            name: "confirmPassword"
-        },
-    ];
-
-    const authInputs: InputItem[] = [
-        {
-            id: 1,
-            text: "Введите вашу электроную почту",
-            name: "email"
-        },
-        {
-            id: 2,
-            text: "Введите пароль",
-            name: "password"
-        },
-    ];
+    const validate = (): boolean => {
+        const newErrors: FormErrors = {};
+        
+        if (!formData.email) {
+            newErrors.email = 'Email обязателен';
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+            newErrors.email = 'Введите корректный email';
+        }
+        
+        if (!formData.password) {
+            newErrors.password = 'Пароль обязателен';
+        } else if (formData.password.length < 6) {
+            newErrors.password = 'Пароль должен быть не менее 6 символов';
+        }
+        
+        if (form) {
+            if (!formData.name) {
+                newErrors.name = 'Имя обязательно';
+            }
+            
+            if (!formData.confirmPassword) {
+                newErrors.confirmPassword = 'Подтвердите пароль';
+            } else if (formData.password !== formData.confirmPassword) {
+                newErrors.confirmPassword = 'Пароли не совпадают';
+            }
+        }
+        
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
 
     const changeForm = () => {
         setForm(!form);
@@ -107,6 +111,7 @@ const AuthorizationModal: React.FC<Props> = ({ handleClose, open }) => {
             password: '',
             confirmPassword: ''
         });
+        setErrors({});
     };
 
     const onChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -115,15 +120,14 @@ const AuthorizationModal: React.FC<Props> = ({ handleClose, open }) => {
             ...prev,
             [name]: value,
         }));
+        if (errors[name as keyof FormErrors]) {
+            setErrors(prev => ({ ...prev, [name]: undefined }));
+        }
     };
 
     const handleRegister = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-
-        if (formData.password !== formData.confirmPassword) {
-            alert('Пароли не совпадают');
-            return;
-        }
+        if (!validate()) return;
 
         const userData = {
             email: formData.email,
@@ -138,17 +142,22 @@ const AuthorizationModal: React.FC<Props> = ({ handleClose, open }) => {
             })
             .catch((error) => {
                 console.error('Registration failed:', error);
+                setErrors({
+                    email: 'Ошибка регистрации. Проверьте данные.',
+                    password: ' ',
+                    confirmPassword: ' '
+                });
             });
     };
 
     const handleLogin = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        if (!validate()) return;
 
         const userData = {
             email: formData.email,
             password: formData.password,
         };
-        console.log('Login data:', { email: formData.email, password: formData.password });
 
         dispatch(login(userData))
             .unwrap()
@@ -157,8 +166,11 @@ const AuthorizationModal: React.FC<Props> = ({ handleClose, open }) => {
             })
             .catch((error) => {
                 console.error('Login failed:', error);
+                setErrors({
+                    email: 'Неверный email или пароль',
+                    password: ' '
+                });
             });
-        handleClose();
     };
 
     if (isSuccess) {
@@ -187,6 +199,8 @@ const AuthorizationModal: React.FC<Props> = ({ handleClose, open }) => {
                             value={formData[input.name as keyof FormData]}
                             type={input.name.includes('password') ? 'password' : 'text'}
                             required
+                            error={Boolean(errors[input.name as keyof FormErrors])}
+                            helperText={errors[input.name as keyof FormErrors]}
                         />
                     ))}
                     <Box sx={{ display: "flex", gap: "4px" }}>
@@ -209,6 +223,8 @@ const AuthorizationModal: React.FC<Props> = ({ handleClose, open }) => {
                             value={formData[input.name as keyof FormData]}
                             type={input.name.includes('password') ? 'password' : 'text'}
                             required
+                            error={Boolean(errors[input.name as keyof FormErrors])}
+                            helperText={errors[input.name as keyof FormErrors]}
                         />
                     ))}
                     <Box sx={{ display: "flex", gap: "4px" }}>
