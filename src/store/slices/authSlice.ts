@@ -51,10 +51,9 @@ const authSlice = createSlice({
     logout: (state: AuthState) => {
       state.user = null;
       state.token = null;
-      state.name = '';
+      state.name = null;
       state.isSuccess = false;
       authService.logout();
-      return initialState;
     },
   },
   extraReducers: (builder) => {
