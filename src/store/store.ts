@@ -1,5 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
 import categoriesReducer from "./slices/categoriesSlice"
+import productsReducer from "./slices/productsSlice"
 import registerReducer from "./slices/registerSlice"
 import loginReducer from "./slices/authSlice"
 import { persistReducer, persistStore } from 'redux-persist';
@@ -19,6 +20,7 @@ export const store = configureStore({
     catergories: categoriesReducer,
     register: registerReducer,
     login: persistedReducer,
+    products: productsReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
